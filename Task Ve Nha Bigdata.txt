@@ -1,0 +1,41 @@
+1.1 (Triet)
+Input: text
+Output: key: format -> key: tuple(termid, docid), value: freq
+An MTX file (Matrix Market format) with three columns:
+o termid: Unique identifier for each term (word) in the vocabulary.
+o docid: Unique identifier for each document.
+o frequency: Frequency of each term in a specific document.
+
+1.2 (Trung)
+Input: MTX
+Ouput: MTX
+-> remove row have freq < 3
+
+1.3 (Ky Thanh)
+Input: MTX
+Output: .txt key: term, value: freq (calc again for all docid)
+Top 10 term highest freq
+
+1.4. (Hoang Hung)
+Input: MTX
+Output: term-doc-tfidf format (MTX)
+
+
+Seminar:
+Real Plan:
+- Architecture:
++ Web send message realtime (text, imgs, videos realtime) message broker
++ Order App:
+	1. Order Food:
+	2. Delivery: time, staff, ...
+- Implementation:
++ Frontend: React
++ Backend: C# ASP.Net
+
+Task:
+- Mọi người tìm hiểu asp .net trung seminar cuoc hop sau
+
+
+
+
+
