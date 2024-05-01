@@ -9,6 +9,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class MapperOne extends Mapper<Object, Text, PairWritable, IntWritable> {
     private IntWritable one = new IntWritable(1);
@@ -42,7 +43,9 @@ public class MapperOne extends Mapper<Object, Text, PairWritable, IntWritable> {
 //            System.out.println(docid);
 //            Configuration configuration = context.getConfiguration();
 //            Path path = new Path(configuration.get("dataPath"));
-            PairWritable pair = new PairWritable(Utils.Resource.getTermid(token.toLowerCase()), Utils.Resource.getDocid(docid));
+            PairWritable pair = new PairWritable(Utils.Resource.getTermid(token), Utils.Resource.getDocid(docid));
+            if(Objects.equals(pair.getdocid(), "0") || Objects.equals(pair.getTermid(), "0"))
+                continue;
             context.write(pair, one);
         }
     }
