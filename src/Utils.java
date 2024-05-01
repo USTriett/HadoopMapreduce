@@ -36,9 +36,7 @@ public class Utils {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     // Process each line of the file
-//                    System.out.println(line);
                     stopWords.add(line);
-
                 }
 
                 // Close the readers
