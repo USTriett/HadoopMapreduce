@@ -18,6 +18,8 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.text.DecimalFormat;
+
 
 
 import org.apache.hadoop.fs.FSDataInputStream;
@@ -47,6 +49,7 @@ public class Main {
 
             String line = reader.readLine();
             totalDocs = Integer.parseInt(line);
+            System.err.println("Total Docs: " + totalDocs);
         }
 
         public static void LoadCountTermInDoc(Path path, Configuration conf) throws IOException {
@@ -91,7 +94,7 @@ public class Main {
     }
 
 
-    public class PairWritable implements WritableComparable<PairWritable> {
+    public static class PairWritable implements WritableComparable<PairWritable> {
         private Text _termid;
         private Text _docid;
     
@@ -130,7 +133,7 @@ public class Main {
     
         @Override
         public String toString() {
-            return _termid + "," + _docid;
+            return _termid + "\t" + _docid;
         }
     
         @Override
@@ -145,14 +148,14 @@ public class Main {
         }
     
         @Override
-        public int hashCode(){
-            return _termid.hashCode()*163 + _docid.hashCode();
+        public int hashCode() {
+            return _termid.hashCode() * 163 + _docid.hashCode();
         }
     
         @Override
         public boolean equals(Object o)
         {
-            if(o instanceof PairWritable)
+            if (o instanceof PairWritable)
             {
                 PairWritable tp = (PairWritable) o;
                 return _termid.equals(tp._termid) && _docid.equals(tp._docid);
@@ -164,12 +167,12 @@ public class Main {
 
 
 
-    public class TFIDFMapper extends Mapper<Object, Text, PairWritable, DoubleWritable> {
+    public static class TFIDFMapper extends Mapper<Object, Text, PairWritable, DoubleWritable> {
         @Override
         protected void map(Object key, Text value, Context context) throws IOException, InterruptedException {
             String line = value.toString();
             if (!line.isEmpty()) {
-                String[] tokens = line.split(" ");
+                String[] tokens = line.split("\\s+");
                 if (tokens.length == 3 && tokens[2].contains(".")) {
                     Text termid = new Text(tokens[0]);
                     Text docid = new Text(tokens[1]);
@@ -181,11 +184,12 @@ public class Main {
         }
     }
 
-    public class TFIDFReducer extends Reducer<PairWritable, DoubleWritable, PairWritable, DoubleWritable> {
+    public static class TFIDFReducer extends Reducer<PairWritable, DoubleWritable, PairWritable, DoubleWritable> {
         @Override
         protected void setup(Context context) throws IOException, InterruptedException {
             Configuration conf = context.getConfiguration();
             String dataPath = conf.get("dataPath");
+            System.err.println("Data Path: " + dataPath);
             Utils.LoadCountTermInDoc(new Path("/utils/totalTermInDoc.txt"), conf);
             Utils.LoadCountDocOfTerm(new Path("/utils/countDocOfTerm.txt"), conf);
             Utils.LoadTotalDoc(new Path("/utils/totalDoc.txt"), conf);
@@ -206,6 +210,11 @@ public class Main {
             tf = (double) termFrequency / docTotalTerms;
             idf = Math.log((double) totalDoc / (double) numDocsOfTerm);
             tfidf = tf * idf;
+        
+            DecimalFormat df = new DecimalFormat("0.0000000");
+            String formatted = df.format(tfidf);
+            tfidf = Double.parseDouble(formatted);
+            
 
             DoubleWritable value = new DoubleWritable(tfidf);
             context.write(key, value);
