@@ -1,4 +1,3 @@
-package com.lab2.partone;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
