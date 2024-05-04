@@ -23,11 +23,11 @@ public class AverageTFIDF {
         @Override
         protected void map(Object key, Text value, Context context) throws IOException, InterruptedException {
             String[] parts = value.toString().split("\t");
-            String termID = parts[0].split(":")[0];
-            String classID = parts[0].split(":")[1];
+            String termID = parts[0].split(" ")[0];
+            String classID = parts[0].split(" ")[1];
             double tfidf = Double.parseDouble(parts[1]);
 
-            context.write(new Text(classID), new Text(termID + ":" + tfidf));
+            context.write(new Text(classID), new Text(termID + " " + tfidf));
         }
     }
 
@@ -37,7 +37,7 @@ public class AverageTFIDF {
             Map<String, Double> termTFIDFMap = new HashMap<>();
 
             for (Text value : values) {
-                String[] parts = value.toString().split(":");
+                String[] parts = value.toString().split(" ");
                 String termID = parts[0];
                 double tfidf = Double.parseDouble(parts[1]);
 
@@ -57,7 +57,7 @@ public class AverageTFIDF {
 
             StringBuilder result = new StringBuilder();
             for (Map.Entry<Double, String> entry : sortedTFIDF.descendingMap().entrySet()) {
-                result.insert(0, entry.getValue() + ":" + entry.getKey() + ", ");
+                result.insert(0, entry.getValue() + " " + entry.getKey() + " ");
             }
             context.write(key, new Text(result.toString()));
         }
