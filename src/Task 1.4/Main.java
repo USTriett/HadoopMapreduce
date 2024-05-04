@@ -41,18 +41,7 @@ public class Main {
             return totalDocs;
         }
 
-        public static void LoadTotalDoc(Path path, Configuration conf) throws IOException {
-            String namenodeURL = conf.get("fs.defaultFS");
-            FileSystem fs = FileSystem.get(URI.create(namenodeURL), conf);
-            FSDataInputStream inputStream = fs.open(path);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-
-            String line = reader.readLine();
-            totalDocs = Integer.parseInt(line);
-            System.err.println("Total Docs: " + totalDocs);
-        }
-
-        public static void LoadCountTermInDoc(Path path, Configuration conf) throws IOException {
+        public static void LoadMTXPreProcess(Path path, Configuration conf) throws IOException {
             String namenodeURL = conf.get("fs.defaultFS");
             FileSystem fs = FileSystem.get(URI.create(namenodeURL), conf);
             FSDataInputStream inputStream = fs.open(path);
@@ -61,20 +50,28 @@ public class Main {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split("\\s+");
-                totalTermInDocMap.put(parts[0], Double.parseDouble(parts[1]));
-            }
-        }
+                if (parts.length != 3) {
+                    continue;
+                } 
+                if (!parts[2].contains(".")) {
+                    totalDocs = Integer.parseInt(parts[1]);
+                    continue;
+                }
 
-        public static void LoadCountDocOfTerm(Path path, Configuration conf) throws IOException {
-            String namenodeURL = conf.get("fs.defaultFS");
-            FileSystem fs = FileSystem.get(URI.create(namenodeURL), conf);
-            FSDataInputStream inputStream = fs.open(path);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+                if (totalTermInDocMap.get(parts[1]) == null) {
+                    totalTermInDocMap.put(parts[1], Double.parseDouble(parts[2]));
+                }
+                else {
+                    totalTermInDocMap.put(parts[1], totalTermInDocMap.get(parts[1]) + Double.parseDouble(parts[2]));
+                }
 
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] parts = line.split("\\s+");
-                countDocOfTermMap.put(parts[0], Integer.parseInt(parts[1]));
+                if (countDocOfTermMap.get(parts[0]) == null) {
+                    countDocOfTermMap.put(parts[0], 1);
+                }
+                else {
+                    countDocOfTermMap.put(parts[0], countDocOfTermMap.get(parts[0]) + 1);
+                }
+
             }
         }
 
@@ -189,10 +186,8 @@ public class Main {
         protected void setup(Context context) throws IOException, InterruptedException {
             Configuration conf = context.getConfiguration();
             String dataPath = conf.get("dataPath");
-            System.err.println("Data Path: " + dataPath);
-            Utils.LoadCountTermInDoc(new Path("/utils/totalTermInDoc.txt"), conf);
-            Utils.LoadCountDocOfTerm(new Path("/utils/countDocOfTerm.txt"), conf);
-            Utils.LoadTotalDoc(new Path("/utils/totalDoc.txt"), conf);
+        
+            Utils.LoadMTXPreProcess(new Path(dataPath), conf);
         }
 
         @Override
@@ -211,8 +206,7 @@ public class Main {
             idf = Math.log((double) totalDoc / (double) numDocsOfTerm);
             tfidf = tf * idf;
         
-            DecimalFormat df = new DecimalFormat("0.0000000");
-            String formatted = df.format(tfidf);
+            String formatted = String.format("%.5f", tfidf);
             tfidf = Double.parseDouble(formatted);
             
 
@@ -222,6 +216,10 @@ public class Main {
     }
 
     public static void main(String[] args) throws IOException, InterruptedException, ClassNotFoundException {
+        if (args.length < 3) {
+            System.out.println("<datapath> <input path> <output path>");
+        }
+
         Job job = Job.getInstance(new Configuration());
         job.setInputFormatClass(TextInputFormat.class);
 
@@ -231,9 +229,13 @@ public class Main {
         job.setReducerClass(TFIDFReducer.class);
         job.setOutputKeyClass(PairWritable.class);
         job.setOutputValueClass(DoubleWritable.class);
-        FileInputFormat.addInputPath(job, new Path(args[0]));
+
+        String dataPath = args[0];
+        job.getConfiguration().set("dataPath", dataPath);
+
+        FileInputFormat.addInputPath(job, new Path(args[1]));
         FileInputFormat.setInputDirRecursive(job, true);
-        FileOutputFormat.setOutputPath(job, new Path(args[1]));
+        FileOutputFormat.setOutputPath(job, new Path(args[2]));
 
         job.submit();
 
