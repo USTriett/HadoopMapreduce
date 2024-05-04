@@ -1,0 +1,18 @@
+Chạy MapReduce trước nhớ set classpath nếu chạy trong folder khác (3 args đọc trong main, input đầu tiên là nguyên folder data)
+"javac -classpath $(/home/triet/hadoop/bin/hadoop classpath) -d <folder nào đó hiện tại là Task 1.1/MapReduce> <folder nào đó hiện tại là Task 1.1/MapReduce>/*.java"
+-> đổi thành đường dẫn bin/hadoop trên máy 
+Compile class
+Convert thành jar
+"jar -cvf partoneone.jar -C Task 1.1/MapReduce/ ."
+Chạy
+
+
+Chạy MTXFormat tương tự
+
+chuyển output thành file -> để đường dẫn onput trên hdfs thành arg trong lúc chạy MTX format
+dạng dạng
+
+"bin/hadoop jar MTXConverter.jar MTXConverter /user/triet/input/output20 /user/triet/output/output.mtx"
+
+
+

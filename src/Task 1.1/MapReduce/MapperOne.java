@@ -1,4 +1,3 @@
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
@@ -43,7 +42,7 @@ public class MapperOne extends Mapper<Object, Text, PairWritable, IntWritable> {
 //            Configuration configuration = context.getConfiguration();
 //            Path path = new Path(configuration.get("dataPath"));
             PairWritable pair = new PairWritable(Utils.Resource.getTermid(token), Utils.Resource.getDocid(docid));
-            if(Objects.equals(pair.getdocid(), "0") || Objects.equals(pair.getTermid(), "0"))
+            if(pair.getdocid().compareTo("0") == 0 || pair.getTermid().compareTo("0") == 0)
                 continue;
             context.write(pair, one);
         }

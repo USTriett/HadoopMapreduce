@@ -17,12 +17,12 @@ public class PairWritable implements WritableComparable<PairWritable> {
     }
 
 
-    public Text getTermid() {
-        return _termid;
+    public String getTermid() {
+        return _termid.toString();
     }
 
-    public Text getdocid() {
-        return _docid;
+    public String getdocid() {
+        return _docid.toString();
     }
 
     public void set(Text termid, Text docid) {
