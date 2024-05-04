@@ -110,7 +110,7 @@ public class TopFrequency {
 	public static void main(String[] args) throws Exception {
 
  		if(args.length < 3){
-            		System.out.println("<datapath> <input path> <output path>");
+            		System.out.println("<datapathToBBCTerm> <input path> <output path>");
        		}
         	Job job = Job.getInstance(new Configuration());
 		Configuration conf = job.getConfiguration();
